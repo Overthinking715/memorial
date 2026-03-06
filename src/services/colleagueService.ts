@@ -1,5 +1,6 @@
 import { supabase } from '../lib/supabaseClient';
 import type { OfferingType } from '../context/AppContext';
+import { getDeviceId } from './messageService';
 
 // 数据库行类型（snake_case）
 export interface ColleagueRow {
@@ -11,6 +12,7 @@ export interface ColleagueRow {
     photo_url: string;
     offerings: string[];
     incense_lit: boolean;
+    device_id: string;
     created_at: string;
     updated_at: string;
 }
@@ -25,6 +27,7 @@ export interface ColleagueData {
     photoUrl: string;
     offerings: OfferingType[];
     incenseLit: boolean;
+    deviceId: string;
 }
 
 // 数据库行 → 前端数据 转换
@@ -38,6 +41,7 @@ function rowToColleague(row: ColleagueRow): ColleagueData {
         photoUrl: row.photo_url,
         offerings: (row.offerings || []) as OfferingType[],
         incenseLit: row.incense_lit,
+        deviceId: row.device_id || '',
     };
 }
 
@@ -51,6 +55,7 @@ function colleagueToRow(data: Partial<ColleagueData>): Record<string, unknown> {
     if (data.photoUrl !== undefined) row.photo_url = data.photoUrl;
     if (data.offerings !== undefined) row.offerings = data.offerings;
     if (data.incenseLit !== undefined) row.incense_lit = data.incenseLit;
+    if (data.deviceId !== undefined) row.device_id = data.deviceId;
     return row;
 }
 
@@ -75,9 +80,9 @@ export async function fetchColleagues(): Promise<ColleagueData[]> {
  * 新增故交
  */
 export async function createColleague(
-    colleague: Omit<ColleagueData, 'id'>
+    colleague: Omit<ColleagueData, 'id' | 'deviceId'>
 ): Promise<ColleagueData> {
-    const row = colleagueToRow(colleague);
+    const row = colleagueToRow({ ...colleague, deviceId: getDeviceId() });
     const { data, error } = await supabase
         .from('colleagues')
         .insert(row)

@@ -14,6 +14,7 @@ export interface Colleague {
   photoUrl: string;
   offerings: OfferingType[];
   incenseLit: boolean;
+  deviceId: string;
 }
 
 export interface Message {
@@ -31,7 +32,7 @@ interface AppState {
   colleagues: Colleague[];
   loading: boolean;
   error: string | null;
-  addColleague: (c: Omit<Colleague, 'id'>) => Promise<Colleague | undefined>;
+  addColleague: (c: Omit<Colleague, 'id' | 'deviceId'>) => Promise<Colleague | undefined>;
   updateColleague: (id: string, updates: Partial<Colleague>) => Promise<void>;
   deleteColleague: (id: string) => Promise<void>;
   selectedId: string;
@@ -88,7 +89,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, []);
 
   // 新增故交
-  const addColleague = useCallback(async (c: Omit<Colleague, 'id'>): Promise<Colleague | undefined> => {
+  const addColleague = useCallback(async (c: Omit<Colleague, 'id' | 'deviceId'>): Promise<Colleague | undefined> => {
     try {
       const newColleague = await colleagueService.createColleague(c);
       setColleagues(prev => [...prev, newColleague]);

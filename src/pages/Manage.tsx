@@ -15,7 +15,7 @@ function formatYears(years: string): string {
 
 export default function Manage() {
   const navigate = useNavigate();
-  const { colleagues, deleteColleague } = useAppContext();
+  const { colleagues, deleteColleague, deviceId } = useAppContext();
   const [swipedId, setSwipedId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -57,56 +57,62 @@ export default function Manage() {
       <div className="flex-1 overflow-y-auto no-scrollbar px-6 pb-32 relative z-10">
         <div className="space-y-1 mt-2">
           <AnimatePresence>
-            {filteredColleagues.map((item, i) => (
-              <motion.div
-                key={item.id}
-                layout
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }}
-                className="relative overflow-hidden border-b border-ash/20"
-              >
-                <div className="absolute right-0 top-0 bottom-0 flex items-center pr-4 gap-4">
-                  <Link to={`/edit/${item.id}`} className="flex flex-col items-center justify-center text-ash hover:text-ink transition-colors">
-                    <span className="material-symbols-outlined text-[22px]">edit</span>
-                    <span className="text-[10px] mt-1">编辑</span>
-                  </Link>
-                  <button
-                    onClick={() => deleteColleague(item.id)}
-                    className="flex flex-col items-center justify-center text-ash hover:text-flame transition-colors"
-                  >
-                    <span className="material-symbols-outlined text-[22px]">delete</span>
-                    <span className="text-[10px] mt-1">删除</span>
-                  </button>
-                </div>
+            {filteredColleagues.map((item, i) => {
+              const isOwn = item.deviceId === deviceId;
+
+              return (
                 <motion.div
-                  drag="x"
-                  dragConstraints={{ left: -120, right: 0 }}
-                  dragElastic={0.1}
-                  onDragEnd={(e, info) => {
-                    if (info.offset.x < -50) {
-                      setSwipedId(item.id);
-                    } else {
-                      setSwipedId(null);
-                    }
-                  }}
-                  animate={{ x: swipedId === item.id ? -120 : 0 }}
-                  className="relative bg-background-light z-10 flex items-center py-4 px-2"
+                  key={item.id}
+                  layout
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="relative overflow-hidden border-b border-ash/20"
                 >
-                  <div className="h-12 w-12 rounded-full bg-surface border border-ash/20 flex items-center justify-center shadow-soft-lift mr-4 overflow-hidden">
-                    {item.photoUrl ? (
-                      <img src={item.photoUrl} className="w-full h-full object-cover filter sepia-[0.2] contrast-[0.9]" />
-                    ) : (
-                      <span className={`material-symbols-outlined text-[24px] ${i === 0 ? 'text-primary' : 'text-ash'}`}>{item.icon}</span>
-                    )}
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="font-display text-lg font-medium text-ink tracking-wide">{item.name}</h3>
-                    <p className="font-sans text-xs text-ash mt-0.5">{item.title} · {formatYears(item.years)}</p>
-                  </div>
+                  {isOwn && (
+                    <div className="absolute right-0 top-0 bottom-0 flex items-center pr-4 gap-4">
+                      <Link to={`/edit/${item.id}`} className="flex flex-col items-center justify-center text-ash hover:text-ink transition-colors">
+                        <span className="material-symbols-outlined text-[22px]">edit</span>
+                        <span className="text-[10px] mt-1">编辑</span>
+                      </Link>
+                      <button
+                        onClick={() => deleteColleague(item.id)}
+                        className="flex flex-col items-center justify-center text-ash hover:text-flame transition-colors"
+                      >
+                        <span className="material-symbols-outlined text-[22px]">delete</span>
+                        <span className="text-[10px] mt-1">删除</span>
+                      </button>
+                    </div>
+                  )}
+                  <motion.div
+                    drag={isOwn ? "x" : false}
+                    dragConstraints={{ left: -120, right: 0 }}
+                    dragElastic={0.1}
+                    onDragEnd={(e, info) => {
+                      if (isOwn && info.offset.x < -50) {
+                        setSwipedId(item.id);
+                      } else {
+                        setSwipedId(null);
+                      }
+                    }}
+                    animate={{ x: swipedId === item.id ? -120 : 0 }}
+                    className="relative bg-background-light z-10 flex items-center py-4 px-2"
+                  >
+                    <div className="h-12 w-12 rounded-full bg-surface border border-ash/20 flex items-center justify-center shadow-soft-lift mr-4 overflow-hidden">
+                      {item.photoUrl ? (
+                        <img src={item.photoUrl} className="w-full h-full object-cover filter sepia-[0.2] contrast-[0.9]" />
+                      ) : (
+                        <span className={`material-symbols-outlined text-[24px] ${i === 0 ? 'text-primary' : 'text-ash'}`}>{item.icon}</span>
+                      )}
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-display text-lg font-medium text-ink tracking-wide">{item.name}</h3>
+                      <p className="font-sans text-xs text-ash mt-0.5">{item.title} · {formatYears(item.years)}</p>
+                    </div>
+                  </motion.div>
                 </motion.div>
-              </motion.div>
-            ))}
+              );
+            })}
           </AnimatePresence>
         </div>
       </div>

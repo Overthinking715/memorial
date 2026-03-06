@@ -12,7 +12,7 @@ function AnimatedRoutes() {
   const location = useLocation();
   return (
     <AnimatePresence mode="wait">
-      <Routes location={location} key={location.pathname}>
+      <Routes location={location}>
         <Route element={<Layout />}>
           <Route path="/" element={<Altar />} />
           <Route path="/hub" element={<Hub />} />

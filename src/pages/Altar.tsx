@@ -117,7 +117,7 @@ export default function Altar() {
             <div className="w-28 h-40 bg-white rounded-xl shadow-float border border-surface overflow-hidden relative">
               <div className="absolute top-2 left-1/2 -translate-x-1/2 w-8 h-1.5 bg-ash/20 rounded-full"></div>
               <div className="pt-8 px-3 flex flex-col items-center">
-                <div className="w-16 h-16 rounded-full bg-ash/10 mb-3 overflow-hidden grayscale group-hover:grayscale-0 transition-all duration-500">
+                <div className="w-16 h-16 rounded-full bg-ash/10 mb-3 overflow-hidden transition-all duration-500">
                   {selectedColleague.photoUrl ? (
                     <img src={selectedColleague.photoUrl} alt="Portrait" className="w-full h-full object-cover" />
                   ) : (
@@ -190,20 +190,39 @@ export default function Altar() {
           {/* Offerings */}
           <div className="relative z-20 mb-[-5px]">
             <div className="w-24 h-8 bg-[#e6e2d6] rounded-[50%] relative shadow-md flex items-center justify-center border-t border-white/50">
-              <div className="absolute -top-5 flex gap-[-5px]">
-                {selectedColleague.offerings.map((offering, idx) => {
-                  const config = offeringIcons[offering];
+              <div className="absolute -top-5 flex items-end">
+                {(() => {
+                  const offerings = selectedColleague.offerings;
+                  const visibleCount = Math.min(offerings.length, 3);
+                  const extraCount = offerings.length - visibleCount;
+                  const visible = offerings.slice(-visibleCount);
                   return (
-                    <motion.div
-                      key={idx}
-                      initial={{ y: -20, opacity: 0 }}
-                      animate={{ y: 0, opacity: 1 }}
-                      className={`w-8 h-8 ${config.bg} rounded-full shadow-sm relative -mr-2 flex items-center justify-center ${config.color} transform ${idx % 2 === 0 ? 'rotate-12' : '-rotate-6 z-10'}`}
-                    >
-                      <span className="material-symbols-outlined text-[16px]" style={{ fontVariationSettings: "'FILL' 1" }}>{config.icon}</span>
-                    </motion.div>
+                    <>
+                      {visible.map((offering, idx) => {
+                        const config = offeringIcons[offering];
+                        return (
+                          <motion.div
+                            key={`visible-${idx}`}
+                            initial={{ y: -20, opacity: 0 }}
+                            animate={{ y: 0, opacity: 1 }}
+                            className={`w-8 h-8 ${config.bg} rounded-full shadow-sm relative -mr-2 flex items-center justify-center ${config.color} transform ${idx % 2 === 0 ? 'rotate-12' : '-rotate-6 z-10'}`}
+                          >
+                            <span className="material-symbols-outlined text-[16px]" style={{ fontVariationSettings: "'FILL' 1" }}>{config.icon}</span>
+                          </motion.div>
+                        );
+                      })}
+                      {extraCount > 0 && (
+                        <motion.div
+                          initial={{ scale: 0 }}
+                          animate={{ scale: 1 }}
+                          className="w-7 h-7 rounded-full bg-flame/90 text-white text-[11px] font-bold flex items-center justify-center shadow-md -ml-1 z-20 border-2 border-white"
+                        >
+                          +{extraCount}
+                        </motion.div>
+                      )}
+                    </>
                   );
-                })}
+                })()}
               </div>
             </div>
           </div>
@@ -216,7 +235,7 @@ export default function Altar() {
               <div
                 key={c.id}
                 onClick={() => setSelectedId(c.id)}
-                className={`snap-center shrink-0 w-14 h-20 rounded shadow-sm border flex flex-col items-center justify-center gap-1 relative overflow-hidden cursor-pointer transition-all ${selectedId === c.id ? 'bg-white border-primary/40' : 'bg-surface/80 border-ash/10 opacity-60 grayscale hover:grayscale-0 hover:opacity-100'}`}
+                className={`snap-center shrink-0 w-14 h-20 rounded shadow-sm border flex flex-col items-center justify-center gap-1 relative overflow-hidden cursor-pointer transition-all ${selectedId === c.id ? 'bg-white border-primary/40' : 'bg-surface/80 border-ash/10 opacity-60 hover:opacity-100'}`}
               >
                 <div className="w-7 h-7 rounded-full bg-ash/10 overflow-hidden shadow-sm flex items-center justify-center">
                   {c.photoUrl ? (

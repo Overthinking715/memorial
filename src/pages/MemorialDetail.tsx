@@ -66,8 +66,11 @@ export default function MemorialDetail() {
     );
   }
 
-  // 共燃温情：基于供品数量动态计算，0 起步，每个供品 +7°C，上限 100
-  const warmth = Math.min(colleague.offerings.length * 7, 100);
+  // 共燃温情：基于供品数量动态计算，前3个每个+7°C，之后每个+5°C，上限100
+  const offeringCount = colleague.offerings.length;
+  const baseWarmth = Math.min(offeringCount, 3) * 7; // 前3个 = 21°C
+  const extraWarmth = Math.max(offeringCount - 3, 0) * 5; // 之后每个+5°C
+  const warmth = Math.min(baseWarmth + extraWarmth, 100);
   const warmthPercent = warmth; // 直接用作进度条百分比
 
   const formatDate = (dateStr: string) => {
@@ -181,8 +184,8 @@ export default function MemorialDetail() {
                 <div
                   key={msg.id}
                   className={`break-inside-avoid rounded-lg p-4 shadow-soft border hover:-translate-y-1 transition-transform duration-300 relative cursor-pointer ${msg.isPinned
-                      ? 'bg-[#FAF8F3] border-flame/20 shadow-float'
-                      : 'bg-white border-paper-stroke'
+                    ? 'bg-[#FAF8F3] border-flame/20 shadow-float'
+                    : 'bg-white border-paper-stroke'
                     }`}
                 >
                   {msg.isPinned && (

@@ -121,7 +121,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const addOffering = useCallback(async (id: string, offering: OfferingType) => {
     const colleague = colleagues.find(c => c.id === id);
     if (!colleague) return;
-    const newOfferings = [...colleague.offerings, offering].slice(-3) as OfferingType[];
+    const newOfferings = [...colleague.offerings, offering] as OfferingType[];
     // 立即更新 UI
     setColleagues(prev => prev.map(c =>
       c.id === id ? { ...c, offerings: newOfferings } : c

@@ -131,14 +131,14 @@ export async function deleteColleagueById(id: string): Promise<void> {
 }
 
 /**
- * 添加供品（最多保留3个）
+ * 添加供品
  */
 export async function addOfferingToColleague(
     id: string,
     offering: OfferingType,
     currentOfferings: OfferingType[]
 ): Promise<OfferingType[]> {
-    const newOfferings = [...currentOfferings, offering].slice(-3);
+    const newOfferings = [...currentOfferings, offering];
     const { error } = await supabase
         .from('colleagues')
         .update({ offerings: newOfferings })

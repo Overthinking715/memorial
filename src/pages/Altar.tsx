@@ -15,7 +15,8 @@ const offeringIcons: Record<OfferingType, { icon: string, color: string, bg: str
 };
 
 // 从 years 字段提取离职日期用于排序
-function getEndDate(years: string): string {
+function getEndDate(yearsStr: string): string {
+  const years = yearsStr || '';
   if (years.includes('~')) {
     return years.split('~')[1] || ''; // 新格式 "2018-03-15~2023-06-30"
   }

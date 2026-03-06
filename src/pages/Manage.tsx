@@ -4,7 +4,8 @@ import { motion, AnimatePresence } from 'motion/react';
 import { useAppContext } from '../context/AppContext';
 
 // 格式化 years 字段显示
-function formatYears(years: string): string {
+function formatYears(yearsStr: string): string {
+  const years = yearsStr || '';
   if (years.includes('~')) {
     const [start, end] = years.split('~');
     const fmtDate = (d: string) => d.replace(/-/g, '.');

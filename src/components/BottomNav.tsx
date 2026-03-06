@@ -8,13 +8,13 @@ export default function BottomNav() {
           <div className="flex h-8 items-center justify-center">
             <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>table_restaurant</span>
           </div>
-          <p className="text-[10px] font-display tracking-widest font-bold">祭台</p>
+          <p className="text-[10px] font-display tracking-widest font-bold">纪念角</p>
         </NavLink>
         <NavLink to="/hub" className={({ isActive }) => `flex flex-1 flex-col items-center justify-end gap-1 rounded-full transition-colors ${isActive ? 'text-primary' : 'text-ash hover:text-primary'}`}>
           <div className="flex h-8 items-center justify-center">
             <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>grid_view</span>
           </div>
-          <p className="text-[10px] font-display tracking-widest font-bold">纪念角</p>
+          <p className="text-[10px] font-display tracking-widest font-bold">印记馆</p>
         </NavLink>
       </div>
     </div>

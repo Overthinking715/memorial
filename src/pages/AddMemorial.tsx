@@ -187,7 +187,8 @@ export default function AddMemorial() {
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
                 className="w-full bg-transparent border-none p-0 text-base font-display text-ink focus:ring-0 outline-none placeholder:text-ash/50"
-                type="date"
+                type="text"
+                placeholder="2018.03.15"
               />
             </div>
             <div className="flex-1 border-b border-ash/20 pb-2">
@@ -196,7 +197,8 @@ export default function AddMemorial() {
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
                 className="w-full bg-transparent border-none p-0 text-base font-display text-ink focus:ring-0 outline-none placeholder:text-ash/50"
-                type="date"
+                type="text"
+                placeholder="2023.06.30"
               />
             </div>
           </div>

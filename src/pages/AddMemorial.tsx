@@ -20,8 +20,8 @@ export default function AddMemorial() {
 
   const [name, setName] = useState('');
   const [title, setTitle] = useState('');
-  const [startYear, setStartYear] = useState('');
-  const [endYear, setEndYear] = useState('');
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
   const [selectedIcon, setSelectedIcon] = useState('ink_pen');
   const [photoUrl, setPhotoUrl] = useState('');
   const [saving, setSaving] = useState(false);
@@ -35,9 +35,17 @@ export default function AddMemorial() {
       if (colleague) {
         setName(colleague.name);
         setTitle(colleague.title);
-        const [start, end] = colleague.years.split('-');
-        setStartYear(start || '');
-        setEndYear(end || '');
+        // 兼容旧格式 "2018-2023" 和新格式 "2018-03-15~2023-06-30"
+        if (colleague.years.includes('~')) {
+          const [start, end] = colleague.years.split('~');
+          setStartDate(start || '');
+          setEndDate(end || '');
+        } else {
+          const [start, end] = colleague.years.split('-');
+          // 旧格式只有年份，补全为该年 1 月 1 日
+          setStartDate(start ? `${start}-01-01` : '');
+          setEndDate(end ? `${end}-01-01` : '');
+        }
         setSelectedIcon(colleague.icon);
         setPhotoUrl(colleague.photoUrl);
       }
@@ -68,13 +76,16 @@ export default function AddMemorial() {
   const handleSave = async () => {
     if (!name || !title || saving) return;
 
+    // 用 ~ 分隔日期，避免与日期中的 - 冲突
+    const yearsValue = `${startDate}~${endDate}`;
+
     setSaving(true);
     try {
       if (isEditing) {
         await updateColleague(id, {
           name,
           title,
-          years: `${startYear}-${endYear}`,
+          years: yearsValue,
           icon: selectedIcon,
           photoUrl
         });
@@ -83,7 +94,7 @@ export default function AddMemorial() {
         await addColleague({
           name,
           title,
-          years: `${startYear}-${endYear}`,
+          years: yearsValue,
           icon: selectedIcon,
           photoUrl,
           offerings: [],
@@ -171,23 +182,21 @@ export default function AddMemorial() {
           </div>
           <div className="flex gap-4">
             <div className="flex-1 border-b border-ash/20 pb-2">
-              <label className="block font-display text-xs text-ash mb-1 tracking-widest uppercase">入职年份</label>
+              <label className="block font-display text-xs text-ash mb-1 tracking-widest uppercase">入职日期</label>
               <input
-                value={startYear}
-                onChange={(e) => setStartYear(e.target.value)}
-                className="w-full bg-transparent border-none p-0 text-lg font-display text-ink focus:ring-0 outline-none placeholder:text-ash/50"
-                placeholder="YYYY"
-                type="text"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                className="w-full bg-transparent border-none p-0 text-base font-display text-ink focus:ring-0 outline-none placeholder:text-ash/50"
+                type="date"
               />
             </div>
             <div className="flex-1 border-b border-ash/20 pb-2">
-              <label className="block font-display text-xs text-ash mb-1 tracking-widest uppercase">离职年份</label>
+              <label className="block font-display text-xs text-ash mb-1 tracking-widest uppercase">离职日期</label>
               <input
-                value={endYear}
-                onChange={(e) => setEndYear(e.target.value)}
-                className="w-full bg-transparent border-none p-0 text-lg font-display text-ink focus:ring-0 outline-none placeholder:text-ash/50"
-                placeholder="YYYY"
-                type="text"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                className="w-full bg-transparent border-none p-0 text-base font-display text-ink focus:ring-0 outline-none placeholder:text-ash/50"
+                type="date"
               />
             </div>
           </div>

@@ -3,18 +3,28 @@ import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { useAppContext } from '../context/AppContext';
 
+// 格式化 years 字段显示
+function formatYears(years: string): string {
+  if (years.includes('~')) {
+    const [start, end] = years.split('~');
+    const fmtDate = (d: string) => d.replace(/-/g, '.');
+    return `${fmtDate(start)} - ${fmtDate(end)}`;
+  }
+  return years; // 旧格式直接显示
+}
+
 export default function Manage() {
   const navigate = useNavigate();
   const { colleagues, deleteColleague } = useAppContext();
   const [swipedId, setSwipedId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
-  
-  const filteredColleagues = colleagues.filter(c => 
+
+  const filteredColleagues = colleagues.filter(c =>
     c.name.includes(searchQuery) || c.title.includes(searchQuery)
   );
 
   return (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -20 }}
@@ -22,7 +32,7 @@ export default function Manage() {
       className="flex flex-col h-screen w-full bg-background-light font-sans text-ink overflow-hidden relative"
     >
       <div className="absolute inset-0 pointer-events-none opacity-[0.03] z-50 bg-[url('data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E')]"></div>
-      
+
       <header className="flex items-center justify-between px-6 pt-14 pb-4 bg-background-light/90 backdrop-blur z-20 sticky top-0 border-b border-ash/10">
         <button onClick={() => navigate(-1)} className="text-ink h-10 w-10 flex items-center justify-center rounded-full active:bg-ash/10 transition-colors">
           <span className="material-symbols-outlined">arrow_back</span>
@@ -34,12 +44,12 @@ export default function Manage() {
       <div className="px-6 py-4">
         <div className="flex items-center bg-surface border border-ash/20 rounded-lg px-4 py-2.5 shadow-inner-pressed">
           <span className="material-symbols-outlined text-ash mr-2 text-[20px]">search</span>
-          <input 
+          <input
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-transparent border-none p-0 text-sm font-sans text-ink focus:ring-0 outline-none placeholder:text-ash" 
-            placeholder="寻觅故人姓名或印记..." 
-            type="text" 
+            className="w-full bg-transparent border-none p-0 text-sm font-sans text-ink focus:ring-0 outline-none placeholder:text-ash"
+            placeholder="寻觅故人姓名或印记..."
+            type="text"
           />
         </div>
       </div>
@@ -48,8 +58,8 @@ export default function Manage() {
         <div className="space-y-1 mt-2">
           <AnimatePresence>
             {filteredColleagues.map((item, i) => (
-              <motion.div 
-                key={item.id} 
+              <motion.div
+                key={item.id}
                 layout
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: 'auto' }}
@@ -61,7 +71,7 @@ export default function Manage() {
                     <span className="material-symbols-outlined text-[22px]">edit</span>
                     <span className="text-[10px] mt-1">编辑</span>
                   </Link>
-                  <button 
+                  <button
                     onClick={() => deleteColleague(item.id)}
                     className="flex flex-col items-center justify-center text-ash hover:text-flame transition-colors"
                   >
@@ -69,7 +79,7 @@ export default function Manage() {
                     <span className="text-[10px] mt-1">删除</span>
                   </button>
                 </div>
-                <motion.div 
+                <motion.div
                   drag="x"
                   dragConstraints={{ left: -120, right: 0 }}
                   dragElastic={0.1}
@@ -92,7 +102,7 @@ export default function Manage() {
                   </div>
                   <div className="flex-1">
                     <h3 className="font-display text-lg font-medium text-ink tracking-wide">{item.name}</h3>
-                    <p className="font-sans text-xs text-ash mt-0.5">{item.title} · {item.years}</p>
+                    <p className="font-sans text-xs text-ash mt-0.5">{item.title} · {formatYears(item.years)}</p>
                   </div>
                 </motion.div>
               </motion.div>

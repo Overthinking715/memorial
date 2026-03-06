@@ -5,6 +5,16 @@ import OfferingModal from '../components/OfferingModal';
 import MessageModal from '../components/MessageModal';
 import { useAppContext } from '../context/AppContext';
 
+// 格式化 years 字段显示
+function formatYears(years: string): string {
+  if (years.includes('~')) {
+    const [start, end] = years.split('~');
+    const fmtDate = (d: string) => d.replace(/-/g, '.');
+    return `${fmtDate(start)} - ${fmtDate(end)}`;
+  }
+  return years;
+}
+
 export default function MemorialDetail() {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
@@ -158,7 +168,7 @@ export default function MemorialDetail() {
               <div className="grid grid-cols-2 gap-3 w-full max-w-[280px]">
                 <div className="bg-background-light/60 rounded-lg p-2 text-center border border-paper-stroke/50">
                   <p className="text-[10px] text-ash uppercase tracking-wider mb-0.5">同行时光</p>
-                  <p className="font-display font-bold text-ink text-base">{colleague.years}</p>
+                  <p className="font-display font-bold text-ink text-sm">{formatYears(colleague.years)}</p>
                 </div>
                 <div className="bg-background-light/60 rounded-lg p-2 text-center border border-paper-stroke/50 relative overflow-hidden">
                   <div className="absolute bottom-0 left-0 h-1 bg-flame/20 w-full">

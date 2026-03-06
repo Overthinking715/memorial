@@ -14,12 +14,29 @@ const offeringIcons: Record<OfferingType, { icon: string, color: string, bg: str
   candle: { icon: 'candle', color: 'text-flame', bg: 'bg-flame/20' }
 };
 
+// 从 years 字段提取离职日期用于排序
+function getEndDate(years: string): string {
+  if (years.includes('~')) {
+    return years.split('~')[1] || ''; // 新格式 "2018-03-15~2023-06-30"
+  }
+  // 旧格式 "2018-2023"，取后半部分补全
+  const parts = years.split('-');
+  return parts.length > 1 ? `${parts[1]}-12-31` : '';
+}
+
 export default function Altar() {
   const [showOffering, setShowOffering] = useState(false);
   const [showMessage, setShowMessage] = useState(false);
   const { colleagues, selectedId, setSelectedId, lightIncense, loading } = useAppContext();
 
-  const selectedColleague = colleagues.find(c => c.id === selectedId) || colleagues[0];
+  // 按离职日期降序排列（最新离职的在最前面）
+  const sortedColleagues = [...colleagues].sort((a, b) => {
+    const dateA = getEndDate(a.years);
+    const dateB = getEndDate(b.years);
+    return dateB.localeCompare(dateA);
+  });
+
+  const selectedColleague = sortedColleagues.find(c => c.id === selectedId) || sortedColleagues[0];
 
   if (loading) {
     return (
@@ -231,7 +248,7 @@ export default function Altar() {
         {/* Colleagues List */}
         <div className="w-full max-w-[300px] mt-6 mb-2">
           <div className="flex gap-3 overflow-x-auto pb-2 snap-x no-scrollbar px-2">
-            {colleagues.map(c => (
+            {sortedColleagues.map(c => (
               <div
                 key={c.id}
                 onClick={() => setSelectedId(c.id)}

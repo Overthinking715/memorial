@@ -1,0 +1,37 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #6B705C;
+  --color-primary-alt: #7b9c16;
+  --color-primary-dark: #525647;
+  --color-background-light: #F5F2EA;
+  --color-background-dark: #1d2111;
+  --color-surface: #EBE6DA;
+  --color-ink: #2C2C2A;
+  --color-ash: #8A8A85;
+  --color-flame: #D4A373;
+  --color-seal: #A65D57;
+  --color-paper-stroke: #D6D2C4;
+
+  --font-display: "Noto Serif SC", serif;
+  --font-sans: "Noto Sans SC", sans-serif;
+  --font-hand: "Long Cang", cursive;
+
+  --shadow-soft-lift: 0 8px 24px -4px rgba(44, 44, 42, 0.12);
+  --shadow-inner-pressed: inset 0 2px 4px rgba(0, 0, 0, 0.06);
+  --shadow-glow: 0 0 15px rgba(212, 163, 115, 0.6);
+  --shadow-seal: 0 4px 12px rgba(107, 112, 92, 0.4), inset 0 2px 4px rgba(255, 255, 255, 0.2);
+}
+
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .writing-vertical-rl {
+    writing-mode: vertical-rl;
+  }
+}

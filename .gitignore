@@ -1,0 +1,32 @@
+# Dependencies
+node_modules/
+
+# Build output
+build/
+dist/
+
+# Test coverage
+coverage/
+
+# Environment variables (keep .env.example as template)
+.env*
+!.env.example
+
+# OS files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# IDE / Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+npm-debug.log*
+
+# AI memory (local only)
+.ai_memory/

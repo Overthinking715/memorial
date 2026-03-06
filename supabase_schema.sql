@@ -23,6 +23,7 @@ CREATE TABLE IF NOT EXISTS messages (
   colleague_id UUID NOT NULL REFERENCES colleagues(id) ON DELETE CASCADE,
   content TEXT NOT NULL,
   author TEXT DEFAULT '匿名',
+  device_id TEXT DEFAULT '',
   is_pinned BOOLEAN DEFAULT FALSE,
   created_at TIMESTAMPTZ DEFAULT now()
 );
@@ -69,6 +70,9 @@ CREATE POLICY "Allow public read on messages" ON messages
 
 CREATE POLICY "Allow public insert on messages" ON messages
   FOR INSERT WITH CHECK (true);
+
+CREATE POLICY "Allow public update on messages" ON messages
+  FOR UPDATE USING (true) WITH CHECK (true);
 
 CREATE POLICY "Allow public delete on messages" ON messages
   FOR DELETE USING (true);

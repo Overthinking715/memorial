@@ -5,6 +5,7 @@ export interface MessageData {
     colleagueId: string;
     content: string;
     author: string;
+    deviceId: string;
     isPinned: boolean;
     createdAt: string;
 }
@@ -14,6 +15,7 @@ interface MessageRow {
     colleague_id: string;
     content: string;
     author: string;
+    device_id: string;
     is_pinned: boolean;
     created_at: string;
 }
@@ -24,9 +26,23 @@ function rowToMessage(row: MessageRow): MessageData {
         colleagueId: row.colleague_id,
         content: row.content,
         author: row.author,
+        deviceId: row.device_id || '',
         isPinned: row.is_pinned,
         createdAt: row.created_at,
     };
+}
+
+/**
+ * 获取或生成设备唯一 ID（用于标识留言归属）
+ */
+export function getDeviceId(): string {
+    const KEY = 'memorial_device_id';
+    let id = localStorage.getItem(KEY);
+    if (!id) {
+        id = crypto.randomUUID();
+        localStorage.setItem(KEY, id);
+    }
+    return id;
 }
 
 /**
@@ -49,25 +65,53 @@ export async function fetchMessages(colleagueId: string): Promise<MessageData[]>
 }
 
 /**
- * 添加留言
+ * 添加留言（附带设备 ID）
  */
 export async function createMessage(
     colleagueId: string,
     content: string,
     author: string = '匿名'
 ): Promise<MessageData> {
+    const deviceId = getDeviceId();
     const { data, error } = await supabase
         .from('messages')
         .insert({
             colleague_id: colleagueId,
             content,
             author,
+            device_id: deviceId,
         })
         .select()
         .single();
 
     if (error) {
         console.error('添加留言失败:', error);
+        throw error;
+    }
+
+    return rowToMessage(data as MessageRow);
+}
+
+/**
+ * 编辑留言（只能编辑自己的）
+ */
+export async function updateMessage(
+    id: string,
+    content: string,
+    author?: string
+): Promise<MessageData> {
+    const updates: Record<string, unknown> = { content };
+    if (author !== undefined) updates.author = author;
+
+    const { data, error } = await supabase
+        .from('messages')
+        .update(updates)
+        .eq('id', id)
+        .select()
+        .single();
+
+    if (error) {
+        console.error('编辑留言失败:', error);
         throw error;
     }
 

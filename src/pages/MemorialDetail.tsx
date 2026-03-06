@@ -8,12 +8,17 @@ import { useAppContext } from '../context/AppContext';
 export default function MemorialDetail() {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
-  const { colleagues, messages, messagesLoading, fetchMessages } = useAppContext();
+  const { colleagues, messages, messagesLoading, fetchMessages, editMessage, removeMessage, deviceId } = useAppContext();
 
   const [showOffering, setShowOffering] = useState(false);
   const [showMessage, setShowMessage] = useState(false);
   const [likedMessages, setLikedMessages] = useState<Set<string>>(new Set());
   const [animatingLikes, setAnimatingLikes] = useState<Set<string>>(new Set());
+  // 编辑状态
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editContent, setEditContent] = useState('');
+  // 删除确认
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const colleague = colleagues.find(c => c.id === id);
 
@@ -55,6 +60,33 @@ export default function MemorialDetail() {
       }, 600);
     }
     setLikedMessages(newLiked);
+  };
+
+  // 开始编辑
+  const startEdit = (msgId: string, content: string) => {
+    setEditingId(msgId);
+    setEditContent(content);
+  };
+
+  // 保存编辑
+  const saveEdit = async () => {
+    if (!editingId || !editContent.trim()) return;
+    await editMessage(editingId, editContent.trim());
+    setEditingId(null);
+    setEditContent('');
+  };
+
+  // 取消编辑
+  const cancelEdit = () => {
+    setEditingId(null);
+    setEditContent('');
+  };
+
+  // 确认删除
+  const confirmDelete = async () => {
+    if (!deletingId) return;
+    await removeMessage(deletingId);
+    setDeletingId(null);
   };
 
   if (!colleague) {
@@ -180,10 +212,12 @@ export default function MemorialDetail() {
             messages.map((msg, idx) => {
               const isLiked = likedMessages.has(msg.id);
               const isAnimating = animatingLikes.has(msg.id);
+              const isOwn = msg.deviceId === deviceId;
+              const isEditing = editingId === msg.id;
               return (
                 <div
                   key={msg.id}
-                  className={`break-inside-avoid rounded-lg p-4 shadow-soft border hover:-translate-y-1 transition-transform duration-300 relative cursor-pointer ${msg.isPinned
+                  className={`break-inside-avoid rounded-lg p-4 shadow-soft border hover:-translate-y-1 transition-transform duration-300 relative group/card ${msg.isPinned
                     ? 'bg-[#FAF8F3] border-flame/20 shadow-float'
                     : 'bg-white border-paper-stroke'
                     }`}
@@ -196,12 +230,61 @@ export default function MemorialDetail() {
                   {idx === 0 && !msg.isPinned && (
                     <div className="absolute top-0 left-0 w-full h-1 bg-primary/10 rounded-t-lg"></div>
                   )}
-                  <p className={`text-ink text-sm leading-relaxed mb-3 ${msg.isPinned ? 'font-hand text-xl leading-normal' : 'font-display'}`}>
-                    {msg.content}
-                  </p>
+
+                  {/* 自己的留言：显示编辑/删除按钮 */}
+                  {isOwn && !isEditing && (
+                    <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover/card:opacity-100 transition-opacity duration-200">
+                      <button
+                        onClick={(e) => { e.stopPropagation(); startEdit(msg.id, msg.content); }}
+                        className="w-6 h-6 rounded-full bg-surface/80 hover:bg-primary/10 flex items-center justify-center transition-colors"
+                        title="编辑"
+                      >
+                        <span className="material-symbols-outlined text-[14px] text-ash hover:text-primary">edit</span>
+                      </button>
+                      <button
+                        onClick={(e) => { e.stopPropagation(); setDeletingId(msg.id); }}
+                        className="w-6 h-6 rounded-full bg-surface/80 hover:bg-flame/10 flex items-center justify-center transition-colors"
+                        title="删除"
+                      >
+                        <span className="material-symbols-outlined text-[14px] text-ash hover:text-flame">delete</span>
+                      </button>
+                    </div>
+                  )}
+
+                  {/* 内容区：编辑模式 vs 展示模式 */}
+                  {isEditing ? (
+                    <div className="mb-3">
+                      <textarea
+                        value={editContent}
+                        onChange={(e) => setEditContent(e.target.value)}
+                        className="w-full bg-surface/50 border border-primary/30 rounded-lg p-2 text-sm text-ink font-display focus:outline-none focus:ring-1 focus:ring-primary/50 resize-none min-h-[60px]"
+                        autoFocus
+                      />
+                      <div className="flex justify-end gap-2 mt-2">
+                        <button
+                          onClick={cancelEdit}
+                          className="px-3 py-1 text-xs text-ash hover:text-ink rounded-full border border-ash/30 hover:border-ash/50 transition-colors"
+                        >
+                          取消
+                        </button>
+                        <button
+                          onClick={saveEdit}
+                          disabled={!editContent.trim()}
+                          className="px-3 py-1 text-xs text-white bg-primary hover:bg-primary-dark rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          保存
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <p className={`text-ink text-sm leading-relaxed mb-3 ${msg.isPinned ? 'font-hand text-xl leading-normal' : 'font-display'}`}>
+                      {msg.content}
+                    </p>
+                  )}
+
                   <div className="flex items-center justify-between border-t border-paper-stroke/30 pt-2">
                     <span className="text-[10px] text-ash font-medium">
-                      {msg.author} · {formatDate(msg.createdAt)}
+                      {msg.author}{isOwn ? ' · 我' : ''} · {formatDate(msg.createdAt)}
                     </span>
                     <button
                       onClick={(e) => { e.stopPropagation(); handleLike(msg.id); }}
@@ -274,6 +357,44 @@ export default function MemorialDetail() {
       <AnimatePresence>
         {showOffering && <OfferingModal onClose={handleOfferingClose} targetId={colleague.id} />}
         {showMessage && <MessageModal onClose={handleMessageClose} targetId={colleague.id} />}
+        {deletingId && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[60] flex items-center justify-center"
+          >
+            <div className="absolute inset-0 bg-[#141414]/50 backdrop-blur-sm" onClick={() => setDeletingId(null)}></div>
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="relative bg-white rounded-2xl shadow-2xl p-6 mx-6 max-w-sm w-full border border-paper-stroke"
+            >
+              <div className="flex flex-col items-center text-center">
+                <div className="w-12 h-12 rounded-full bg-flame/10 flex items-center justify-center mb-3">
+                  <span className="material-symbols-outlined text-flame text-2xl">delete_forever</span>
+                </div>
+                <h3 className="font-display font-bold text-ink text-lg mb-2">确认删除</h3>
+                <p className="text-ash text-sm mb-6">删后不可恢复，确定要撤回这条别言吗？</p>
+                <div className="flex gap-3 w-full">
+                  <button
+                    onClick={() => setDeletingId(null)}
+                    className="flex-1 h-10 rounded-full border border-ash/30 text-ash hover:text-ink hover:border-ash/50 transition-colors text-sm font-medium"
+                  >
+                    再想想
+                  </button>
+                  <button
+                    onClick={confirmDelete}
+                    className="flex-1 h-10 rounded-full bg-flame text-white hover:bg-flame/90 transition-colors text-sm font-bold shadow-sm"
+                  >
+                    确认删除
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
       </AnimatePresence>
     </motion.div>
   );

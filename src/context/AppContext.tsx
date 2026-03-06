@@ -21,6 +21,7 @@ export interface Message {
   colleagueId: string;
   content: string;
   author: string;
+  deviceId: string;
   isPinned: boolean;
   createdAt: string;
 }
@@ -42,6 +43,10 @@ interface AppState {
   messagesLoading: boolean;
   fetchMessages: (colleagueId: string) => Promise<void>;
   addMessage: (colleagueId: string, content: string, author?: string) => Promise<void>;
+  editMessage: (id: string, content: string, author?: string) => Promise<void>;
+  removeMessage: (id: string) => Promise<void>;
+  // 设备 ID
+  deviceId: string;
   // 图片上传
   uploadColleaguePhoto: (file: File) => Promise<string>;
 }
@@ -55,6 +60,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [selectedId, setSelectedId] = useState<string>('');
   const [messages, setMessages] = useState<Message[]>([]);
   const [messagesLoading, setMessagesLoading] = useState(false);
+
+  // 获取当前设备 ID
+  const deviceId = messageService.getDeviceId();
 
   // 初始化：加载所有故交数据
   useEffect(() => {
@@ -179,6 +187,26 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  // 编辑留言
+  const editMessage = useCallback(async (id: string, content: string, author?: string) => {
+    try {
+      const updated = await messageService.updateMessage(id, content, author);
+      setMessages(prev => prev.map(m => m.id === id ? updated : m));
+    } catch (err) {
+      console.error('编辑留言失败:', err);
+    }
+  }, []);
+
+  // 删除留言
+  const removeMessage = useCallback(async (id: string) => {
+    try {
+      await messageService.deleteMessage(id);
+      setMessages(prev => prev.filter(m => m.id !== id));
+    } catch (err) {
+      console.error('删除留言失败:', err);
+    }
+  }, []);
+
   // 上传照片
   const uploadColleaguePhoto = useCallback(async (file: File): Promise<string> => {
     return await uploadPhoto(file);
@@ -192,6 +220,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       addOffering, lightIncense,
       messages, messagesLoading,
       fetchMessages: fetchMessagesForColleague, addMessage,
+      editMessage, removeMessage,
+      deviceId,
       uploadColleaguePhoto,
     }}>
       {children}

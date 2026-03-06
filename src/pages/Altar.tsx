@@ -276,7 +276,7 @@ export default function Altar() {
             <div className="w-10 h-10 rounded-full border border-ash/30 flex items-center justify-center bg-white/50 group-hover:border-primary/50 group-hover:bg-white transition-all shadow-sm">
               <span className="material-symbols-outlined text-[20px]">card_giftcard</span>
             </div>
-            <span className="text-xs font-medium tracking-wide">敬供品</span>
+            <span className="text-xs font-medium tracking-wide">添加礼物</span>
           </button>
         </div>
       </div>

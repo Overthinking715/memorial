@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { motion } from 'motion/react';
 import { useAppContext } from '../context/AppContext';
 
@@ -33,8 +34,8 @@ export default function MessageModal({ onClose, targetId }: MessageModalProps) {
     }
   };
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center">
+  const modalContent = (
+    <div className="fixed inset-0 z-[100] flex items-end justify-center">
       <div className="absolute inset-0 bg-[#141414]/60 backdrop-blur-sm" onClick={onClose}></div>
 
       <motion.div
@@ -42,7 +43,7 @@ export default function MessageModal({ onClose, targetId }: MessageModalProps) {
         animate={{ y: 0 }}
         exit={{ y: '100%' }}
         transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-        className="relative w-full h-full min-h-screen flex flex-col max-w-md mx-auto bg-background-light shadow-2xl overflow-hidden"
+        className="relative w-full h-[100dvh] flex flex-col max-w-md mx-auto bg-background-light shadow-2xl overflow-hidden"
       >
         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cream-paper.png')] opacity-30 z-0 pointer-events-none"></div>
 
@@ -138,4 +139,7 @@ export default function MessageModal({ onClose, targetId }: MessageModalProps) {
       </motion.div>
     </div>
   );
+
+  // 确保只能在客户端渲染（防止 body 在某些服务端渲染场景下未定义）
+  return typeof document !== 'undefined' ? createPortal(modalContent, document.body) : null;
 }

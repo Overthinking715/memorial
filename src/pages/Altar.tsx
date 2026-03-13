@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import OfferingModal from '../components/OfferingModal';
@@ -29,6 +29,32 @@ export default function Altar() {
   const [showOffering, setShowOffering] = useState(false);
   const [showMessage, setShowMessage] = useState(false);
   const { colleagues, selectedId, setSelectedId, lightIncense, loading } = useAppContext();
+
+  // 滚动容器 ref 和卡片元素 ref map
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const cardRefs = useRef<Map<string, HTMLDivElement>>(new Map());
+
+  // 设置卡片 ref 的回调
+  const setCardRef = useCallback((id: string, el: HTMLDivElement | null) => {
+    if (el) {
+      cardRefs.current.set(id, el);
+    } else {
+      cardRefs.current.delete(id);
+    }
+  }, []);
+
+  // 当 selectedId 变化时，自动滚动到对应卡片使其居中
+  useEffect(() => {
+    if (!selectedId) return;
+    const cardEl = cardRefs.current.get(selectedId);
+    if (cardEl) {
+      cardEl.scrollIntoView({
+        behavior: 'smooth',
+        block: 'nearest',
+        inline: 'center',
+      });
+    }
+  }, [selectedId]);
 
   // 按离职日期降序排列（最新离职的在最前面）
   const sortedColleagues = [...colleagues].sort((a, b) => {
@@ -248,10 +274,11 @@ export default function Altar() {
 
         {/* Colleagues List */}
         <div className="w-full max-w-[300px] mt-6 mb-2">
-          <div className="flex gap-3 overflow-x-auto pb-2 snap-x no-scrollbar px-2">
+          <div ref={scrollContainerRef} className="flex gap-3 overflow-x-auto pb-2 snap-x no-scrollbar px-2">
             {sortedColleagues.map(c => (
               <div
                 key={c.id}
+                ref={(el) => setCardRef(c.id, el)}
                 onClick={() => setSelectedId(c.id)}
                 className={`snap-center shrink-0 w-14 h-20 rounded shadow-sm border flex flex-col items-center justify-center gap-1 relative overflow-hidden cursor-pointer transition-all ${selectedId === c.id ? 'bg-white border-primary/40' : 'bg-surface/80 border-ash/10 opacity-60 hover:opacity-100'}`}
               >

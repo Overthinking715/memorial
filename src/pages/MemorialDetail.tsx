@@ -156,12 +156,6 @@ export default function MemorialDetail() {
                     <span className="material-symbols-outlined text-[48px] text-ash">{colleague.icon}</span>
                   )}
                 </div>
-                <div className="absolute -bottom-2 -right-2 bg-white rounded-full p-1 shadow-sm border border-paper-stroke">
-                  <div className="bg-[#A65D57] text-white text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 shadow-inner">
-                    <span className="material-symbols-outlined text-[12px]">award_star</span>
-                    <span>项目元老</span>
-                  </div>
-                </div>
               </div>
               <h2 className="text-2xl font-display font-bold text-ink mb-1 tracking-tight">{colleague.name}</h2>
               <p className="text-primary font-sans text-sm font-medium mb-4">{colleague.title}</p>
